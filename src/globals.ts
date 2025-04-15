@@ -1,6 +1,6 @@
 import { endpointStrings } from './providers/types';
 
-export const POWERED_BY: string = 'portkey';
+export const POWERED_BY: string = 'gateway';
 
 export const MAX_RETRY_LIMIT_MS = 60 * 1000; // 60 seconds
 
@@ -92,6 +92,7 @@ export const RECRAFTAI: string = 'recraft-ai';
 export const MILVUS: string = 'milvus';
 export const REPLICATE: string = 'replicate';
 export const LEPTON: string = 'lepton';
+export const WATSONX_AI: string = 'watsonx';
 
 export const VALID_PROVIDERS = [
   ANTHROPIC,
@@ -149,6 +150,7 @@ export const VALID_PROVIDERS = [
   REPLICATE,
   POWERED_BY,
   LEPTON,
+  WATSONX_AI,
 ];
 
 export const CONTENT_TYPES = {
