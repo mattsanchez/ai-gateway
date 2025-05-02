@@ -1,8 +1,4 @@
-import {
-  CompletionResponse,
-  ErrorResponse,
-  ProviderConfig,
-} from '../types';
+import { CompletionResponse, ErrorResponse, ProviderConfig } from '../types';
 import { WATSONX_AI } from '../../globals';
 import {
   generateErrorResponse,
@@ -48,21 +44,28 @@ export const WXCompleteResponseTransform = (
 ): CompletionResponse | ErrorResponse => {
   try {
     if (response.error) {
-      return generateErrorResponse({
-        message: response.error.message || 'Unknown error',
-        type: response.error.type || null,
-        param: response.error.param || null,
-        code: response.error.code || null
-      }, WATSONX_AI);
+      return generateErrorResponse(
+        {
+          message: response.error.message || 'Unknown error',
+          type: response.error.type || null,
+          param: response.error.param || null,
+          code: response.error.code || null,
+        },
+        WATSONX_AI
+      );
     }
 
     return {
       id: response.id || `cmpl-${Date.now()}`,
       object: 'text_completion',
       created: response.created || Math.floor(Date.now() / 1000),
-      model: response.model || response.model_id || params.model || 'ibm/granite-3-2-8b-instruct',
+      model:
+        response.model ||
+        response.model_id ||
+        params.model ||
+        'ibm/granite-3-2-8b-instruct',
       choices: response.choices || [],
-      usage: response.usage || {}
+      usage: response.usage || {},
     };
   } catch (error) {
     console.error('Error transforming watsonx complete response:', error);
@@ -76,12 +79,15 @@ export const WXCompleteStreamChunkTransform = (
 ): string => {
   try {
     if (chunk.error) {
-      const errorResponse = generateErrorResponse({
-        message: chunk.error.message || 'Unknown error',
-        type: chunk.error.type || null,
-        param: chunk.error.param || null,
-        code: chunk.error.code || null
-      }, WATSONX_AI);
+      const errorResponse = generateErrorResponse(
+        {
+          message: chunk.error.message || 'Unknown error',
+          type: chunk.error.type || null,
+          param: chunk.error.param || null,
+          code: chunk.error.code || null,
+        },
+        WATSONX_AI
+      );
       return `data: ${JSON.stringify(errorResponse)}\n\n`;
     }
 
@@ -104,7 +110,10 @@ export const WXCompleteStreamChunkTransform = (
     return `data: ${JSON.stringify(completionChunk)}\n\n`;
   } catch (error) {
     console.error('Error transforming watsonx complete stream chunk:', error);
-    const errorResponse = generateInvalidProviderResponseError(chunk, WATSONX_AI);
+    const errorResponse = generateInvalidProviderResponseError(
+      chunk,
+      WATSONX_AI
+    );
     return `data: ${JSON.stringify(errorResponse)}\n\n`;
   }
 };

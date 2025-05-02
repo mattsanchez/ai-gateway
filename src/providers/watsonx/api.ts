@@ -2,7 +2,10 @@ import { ProviderAPIConfig } from '../types';
 import axios, { AxiosError } from 'axios';
 
 export const WatsonxAPIConfig: ProviderAPIConfig = {
-  getBaseURL: ({ providerOptions }) => providerOptions.customHost || process.env.WATSONX_URL || 'https://us-south.ml.cloud.ibm.com',
+  getBaseURL: ({ providerOptions }) =>
+    providerOptions.customHost ||
+    process.env.WATSONX_URL ||
+    'https://us-south.ml.cloud.ibm.com',
   headers: async ({ providerOptions, fn, gatewayRequestBody }) => {
     // IBM Cloud API Key must be exchanged for an access token and then added to each request
     /*
@@ -37,18 +40,17 @@ export const WatsonxAPIConfig: ProviderAPIConfig = {
       const headers: Record<string, string> = {
         Authorization: `Bearer ${access_token}`,
       };
-      
+
       return headers;
-    }
-    catch (e: any) {
-      console.log(`Error getting access token for watsonx: ${e.data.errorDetails}`)
+    } catch (e: any) {
+      console.log(
+        `Error getting access token for watsonx: ${e.data.errorDetails}`
+      );
     }
   },
   getEndpoint: ({ fn, providerOptions }) => {
     // Accept watsonx_version in header.
-    const version =
-      providerOptions?.['watsonxVersion'] ??
-      '2024-05-31';
+    const version = providerOptions?.['watsonxVersion'] ?? '2024-05-31';
 
     switch (fn) {
       case 'complete':
@@ -56,7 +58,7 @@ export const WatsonxAPIConfig: ProviderAPIConfig = {
       case 'chatComplete':
         return `/ml/v1/text/chat?version=${version}`;
       case 'embed':
-        return `/ml/v1/text/embeddings?version=${version}`
+        return `/ml/v1/text/embeddings?version=${version}`;
       default:
         return '';
     }

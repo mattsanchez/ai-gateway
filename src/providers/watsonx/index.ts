@@ -1,19 +1,16 @@
 import { ProviderConfigs } from '../types';
 import { WatsonxAPIConfig } from './api';
-import { 
-  WXChatCompleteConfig, 
-  WXChatCompleteResponseTransform, 
-  WXChatCompleteStreamChunkTransform 
+import {
+  WXChatCompleteConfig,
+  WXChatCompleteResponseTransform,
+  WXChatCompleteStreamChunkTransform,
 } from './chatComplete';
 import {
   WXCompleteConfig,
   WXCompleteResponseTransform,
   WXCompleteStreamChunkTransform,
 } from './complete';
-import {
-  WXEmbedConfig,
-  WXEmbedResponseTransform,
-} from './embed';
+import { WXEmbedConfig, WXEmbedResponseTransform } from './embed';
 import {
   chatCompleteParams,
   completeParams,
@@ -23,7 +20,11 @@ import {
 
 const WatsonxConfig: ProviderConfigs = {
   complete: completeParams([], {}, WXCompleteConfig),
-  chatComplete: chatCompleteParams([], {model: 'ibm/granite-3-2-8b-instruct'}, WXChatCompleteConfig),
+  chatComplete: chatCompleteParams(
+    [],
+    { model: 'ibm/granite-3-2-8b-instruct' },
+    WXChatCompleteConfig
+  ),
   embed: embedParams([], {}, WXEmbedConfig),
   api: WatsonxAPIConfig,
   responseTransforms: {

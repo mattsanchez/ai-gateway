@@ -1,7 +1,7 @@
 import {
   ChatCompletionResponse,
   ErrorResponse,
-  ProviderConfig
+  ProviderConfig,
 } from '../types';
 import { WATSONX_AI } from '../../globals';
 import {
@@ -28,10 +28,10 @@ export const WXChatCompleteConfig: ProviderConfig = {
     max: 1,
   },
   space_id: {
-    param: 'space_id'
+    param: 'space_id',
   },
   project_id: {
-    param: 'project_id'
+    param: 'project_id',
   },
   max_tokens: {
     param: 'max_tokens',
@@ -42,7 +42,7 @@ export const WXChatCompleteConfig: ProviderConfig = {
     param: 'max_tokens',
     default: null,
     min: 1,
-  }
+  },
 };
 
 export const WXChatCompleteResponseTransform = (
@@ -51,19 +51,26 @@ export const WXChatCompleteResponseTransform = (
 ): ChatCompletionResponse | ErrorResponse => {
   try {
     if (response.error) {
-      return generateErrorResponse({
-        message: response.error.message || 'Unknown error',
-        type: response.error.type || null,
-        param: response.error.param || null,
-        code: response.error.code || null
-      }, WATSONX_AI);
+      return generateErrorResponse(
+        {
+          message: response.error.message || 'Unknown error',
+          type: response.error.type || null,
+          param: response.error.param || null,
+          code: response.error.code || null,
+        },
+        WATSONX_AI
+      );
     }
 
     return {
       id: response.id || `chatcmpl-${Date.now()}`,
       object: 'chat.completion',
       created: response.created,
-      model: response.model || response.model_id || params.model || 'ibm/granite-3-2-8b-instruct',
+      model:
+        response.model ||
+        response.model_id ||
+        params.model ||
+        'ibm/granite-3-2-8b-instruct',
       choices: response.choices || [],
       usage: {
         prompt_tokens: response.usage?.prompt_tokens || 0,
@@ -117,16 +124,19 @@ export const WXChatCompleteStreamChunkTransform = (
 ): string => {
   try {
     if (chunk.error) {
-      const errorResponse = generateErrorResponse({
-        message: chunk.error.message || 'Unknown error',
-        type: chunk.error.type || null,
-        param: chunk.error.param || null,
-        code: chunk.error.code || null
-      }, WATSONX_AI);
+      const errorResponse = generateErrorResponse(
+        {
+          message: chunk.error.message || 'Unknown error',
+          type: chunk.error.type || null,
+          param: chunk.error.param || null,
+          code: chunk.error.code || null,
+        },
+        WATSONX_AI
+      );
       return `data: ${JSON.stringify(errorResponse)}\n\n`;
     }
 
-    const { id, event, data } = parseSSEEvent(chunk)
+    const { id, event, data } = parseSSEEvent(chunk);
 
     // For streaming, we need to format the response as an SSE event with just a data: section to keep it clean
     const completionChunk = {
@@ -137,13 +147,19 @@ export const WXChatCompleteStreamChunkTransform = (
       model: data.model_id || data.model || 'ibm/granite-3-2-8b-instruct',
       model_version: data.model_version,
       choices: data.choices || [],
-      usage: data.usage
+      usage: data.usage,
     };
 
     return `data: ${JSON.stringify(completionChunk)}\n\n`;
   } catch (error) {
-    console.error('Error transforming watsonx chat complete stream chunk:', error);
-    const errorResponse = generateInvalidProviderResponseError(chunk, WATSONX_AI);
+    console.error(
+      'Error transforming watsonx chat complete stream chunk:',
+      error
+    );
+    const errorResponse = generateInvalidProviderResponseError(
+      chunk,
+      WATSONX_AI
+    );
     return `data: ${JSON.stringify(errorResponse)}\n\n`;
   }
 };

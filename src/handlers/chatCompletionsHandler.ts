@@ -26,7 +26,7 @@ export async function chatCompletionsHandler(c: Context): Promise<Response> {
     camelCaseConfig = patchConfigFromEnvironment(camelCaseConfig);
 
     // Patch request with provider config
-    request = patchRequest(request, camelCaseConfig)
+    request = patchRequest(request, camelCaseConfig);
 
     const tryTargetsResponse = await tryTargetsRecursively(
       c,

@@ -879,7 +879,7 @@ export async function tryTargetsRecursively(
             error instanceof GatewayError
               ? error.message
               : 'Something went wrong';
-          
+
           response = new Response(
             JSON.stringify({
               status: 'failure',
@@ -987,9 +987,9 @@ export function patchConfigFromEnvironment(
 
 export function patchRequest(request: any, config: Options | Targets): any {
   if (config.watsonxSpaceId && !request.space_id) {
-    request.space_id = config.watsonxSpaceId
+    request.space_id = config.watsonxSpaceId;
   }
-  return request
+  return request;
 }
 
 export function constructConfigFromRequestHeaders(

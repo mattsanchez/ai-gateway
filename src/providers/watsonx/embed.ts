@@ -34,20 +34,24 @@ export const WXEmbedConfig: ProviderConfig = {
 export const WXEmbedResponseTransform = (response: any, params: Params) => {
   try {
     if (response.error) {
-      return generateErrorResponse({
-        message: response.error.message || 'Unknown error',
-        type: response.error.type || null,
-        param: response.error.param || null,
-        code: response.error.code || null
-      }, WATSONX_AI);
+      return generateErrorResponse(
+        {
+          message: response.error.message || 'Unknown error',
+          type: response.error.type || null,
+          param: response.error.param || null,
+          code: response.error.code || null,
+        },
+        WATSONX_AI
+      );
     }
 
     // Extract embeddings from the response
-    const embeddings = response.results?.map((result: any, index: number) => ({
-      object: 'embedding',
-      embedding: result.embedding,
-      index,
-    })) || [];
+    const embeddings =
+      response.results?.map((result: any, index: number) => ({
+        object: 'embedding',
+        embedding: result.embedding,
+        index,
+      })) || [];
 
     return {
       object: 'list',
