@@ -302,6 +302,13 @@
       "object": "provider",
       "description": "Dashscope provides intelligent analytics solutions designed to help businesses visualize and interpret complex data effectively. Their platform integrates advanced machine learning algorithms to generate real-time insights from diverse datasets, enabling organizations to make informed decisions quickly. Dashscope focuses on enhancing data accessibility and usability, empowering teams to leverage analytics for strategic planning and operational efficiency.",
       "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    },
+    {
+      "id": "watsonx",
+      "name": "IBM watsonx",
+      "object": "provider",
+      "description": "IBM watsonx as a Service is where you work with, deploy, and govern foundation and machine learning models with watsonx.ai and watsonx.governance.",
+      "base_url": "https://us-south.ml.cloud.ibm.com"
     }
   ]
 }

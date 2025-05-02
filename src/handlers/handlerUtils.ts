@@ -17,6 +17,7 @@ import {
   SAGEMAKER,
   FIREWORKS_AI,
   CORTEX,
+  WATSONX_AI,
 } from '../globals';
 import Providers from '../providers';
 import { ProviderAPIConfig, endpointStrings } from '../providers/types';
@@ -31,6 +32,8 @@ import { ConditionalRouter } from '../services/conditionalRouter';
 import { RouterError } from '../errors/RouterError';
 import { GatewayError } from '../errors/GatewayError';
 import { HookType } from '../middlewares/hooks/types';
+
+const exHeaderKey = `x-${POWERED_BY}-exception`;
 
 /**
  * Constructs the request options for the API call.
@@ -760,7 +763,7 @@ export async function tryTargetsRecursively(
           `${currentJsonPath}.targets[${index}]`,
           currentInheritedConfig
         );
-        if (response?.headers.get('x-portkey-gateway-exception') === 'true') {
+        if (response?.headers.get(exHeaderKey) === 'true') {
           break;
         }
         if (
@@ -876,6 +879,7 @@ export async function tryTargetsRecursively(
             error instanceof GatewayError
               ? error.message
               : 'Something went wrong';
+          
           response = new Response(
             JSON.stringify({
               status: 'failure',
@@ -886,7 +890,7 @@ export async function tryTargetsRecursively(
               headers: {
                 'content-type': 'application/json',
                 // Add this header so that the fallback loop can be interrupted if its an exception.
-                'x-portkey-gateway-exception': 'true',
+                exHeaderKey: 'true',
               },
             }
           );
@@ -968,9 +972,24 @@ export function patchConfigFromEnvironment(
       config.apiKey = process.env.OPENROUTER_API_KEY;
     } else if (config.provider == 'google' && process.env.GEMINI_API_KEY) {
       config.apiKey = process.env.GEMINI_API_KEY;
+    } else if (config.provider == 'watsonx' && process.env.WATSONX_API_KEY) {
+      config.apiKey = process.env.WATSONX_API_KEY;
+      if (!config.watsonxProjectId) {
+        config.watsonxProjectId = process.env.WATSONX_PROJECT_ID;
+      }
+      if (!config.watsonxSpaceId) {
+        config.watsonxSpaceId = process.env.WATSONX_SPACE_ID;
+      }
     }
   }
   return config;
+}
+
+export function patchRequest(request: any, config: Options | Targets): any {
+  if (config.watsonxSpaceId && !request.space_id) {
+    request.space_id = config.watsonxSpaceId
+  }
+  return request
 }
 
 export function constructConfigFromRequestHeaders(
@@ -1089,6 +1108,12 @@ export function constructConfigFromRequestHeaders(
     anthropicVersion: requestHeaders[`x-${POWERED_BY}-anthropic-version`],
   };
 
+  const watsonxConfig = {
+    watsonxVersion: requestHeaders[`x-${POWERED_BY}-watsonx-version`],
+    watsonxSpaceId: requestHeaders[`x-${POWERED_BY}-watsonx-space-id`],
+    watsonxProjectId: requestHeaders[`x-${POWERED_BY}-watsonx-project-id`],
+  };
+
   const vertexServiceAccountJson =
     requestHeaders[`x-${POWERED_BY}-vertex-service-account-json`];
 
@@ -1199,6 +1224,12 @@ export function constructConfigFromRequestHeaders(
           ...anthropicConfig,
         };
       }
+      if (parsedConfigJson.provider === WATSONX_AI) {
+        parsedConfigJson = {
+          ...parsedConfigJson,
+          ...watsonxConfig,
+        };
+      }
       if (parsedConfigJson.provider === STABILITY_AI) {
         parsedConfigJson = {
           ...parsedConfigJson,
@@ -1248,6 +1279,8 @@ export function constructConfigFromRequestHeaders(
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === OPEN_AI && openAiConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === ANTHROPIC &&
       anthropicConfig),
+    ...(requestHeaders[`x-${POWERED_BY}-provider`] === WATSONX_AI &&
+      watsonxConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === HUGGING_FACE &&
       huggingfaceConfig),
     mistralFimCompletion:

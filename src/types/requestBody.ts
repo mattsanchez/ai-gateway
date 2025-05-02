@@ -153,6 +153,11 @@ export interface Options {
 
   /** Cortex specific fields */
   snowflakeAccount?: string;
+
+  /** IBM watsonx.ai specific fields */
+  watsonxVersion?: string;
+  watsonxSpaceId?: string;
+  watsonxProjectId?: string;
 }
 
 /**
@@ -197,6 +202,11 @@ export interface Targets {
 
   defaultInputGuardrails?: HookObject[];
   defaultOutputGuardrails?: HookObject[];
+
+  /** IBM watsonx.ai specific fields */
+  watsonxVersion?: string;
+  watsonxSpaceId?: string;
+  watsonxProjectId?: string;
 }
 
 /**
@@ -408,6 +418,9 @@ export interface Params {
     type?: string;
     budget_tokens: number;
   };
+  // WatsonX Specific
+  space_id?: string;
+  project_id?: string;
 }
 
 interface Examples {

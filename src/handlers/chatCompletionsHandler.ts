@@ -1,7 +1,9 @@
 import { RouterError } from '../errors/RouterError';
+import { Options, Targets } from '../types/requestBody';
 import {
   constructConfigFromRequestHeaders,
   patchConfigFromEnvironment,
+  patchRequest,
   tryTargetsRecursively,
 } from './handlerUtils';
 import { Context } from 'hono';
@@ -22,6 +24,9 @@ export async function chatCompletionsHandler(c: Context): Promise<Response> {
 
     // Patch provider config with system values specified in env vars
     camelCaseConfig = patchConfigFromEnvironment(camelCaseConfig);
+
+    // Patch request with provider config
+    request = patchRequest(request, camelCaseConfig)
 
     const tryTargetsResponse = await tryTargetsRecursively(
       c,

@@ -1,25 +1,37 @@
 import { ProviderConfigs } from '../types';
-import WXApiConfig from './api';
-// import {
-//   AnthropicChatCompleteConfig,
-//   AnthropicChatCompleteResponseTransform,
-//   AnthropicChatCompleteStreamChunkTransform,
-// } from './chatComplete';
-// import {
-//   AnthropicCompleteConfig,
-//   AnthropicCompleteResponseTransform,
-//   AnthropicCompleteStreamChunkTransform,
-// } from './complete';
+import { WatsonxAPIConfig } from './api';
+import { 
+  WXChatCompleteConfig, 
+  WXChatCompleteResponseTransform, 
+  WXChatCompleteStreamChunkTransform 
+} from './chatComplete';
+import {
+  WXCompleteConfig,
+  WXCompleteResponseTransform,
+  WXCompleteStreamChunkTransform,
+} from './complete';
+import {
+  WXEmbedConfig,
+  WXEmbedResponseTransform,
+} from './embed';
+import {
+  chatCompleteParams,
+  completeParams,
+  embedParams,
+  responseTransformers,
+} from '../open-ai-base';
 
 const WatsonxConfig: ProviderConfigs = {
-  //   complete: AnthropicCompleteConfig,
-  //   chatComplete: AnthropicChatCompleteConfig,
-  api: WXApiConfig,
+  complete: completeParams([], {}, WXCompleteConfig),
+  chatComplete: chatCompleteParams([], {model: 'ibm/granite-3-2-8b-instruct'}, WXChatCompleteConfig),
+  embed: embedParams([], {}, WXEmbedConfig),
+  api: WatsonxAPIConfig,
   responseTransforms: {
-    // 'stream-complete': AnthropicCompleteStreamChunkTransform,
-    // complete: AnthropicCompleteResponseTransform,
-    // chatComplete: AnthropicChatCompleteResponseTransform,
-    // 'stream-chatComplete': AnthropicChatCompleteStreamChunkTransform,
+    'stream-complete': WXCompleteStreamChunkTransform,
+    // complete: WXCompleteResponseTransform,
+    chatComplete: WXChatCompleteResponseTransform,
+    // 'stream-chatComplete': WXChatCompleteStreamChunkTransform,
+    embed: WXEmbedResponseTransform,
   },
 };
 

@@ -1,8 +1,8 @@
 import { ProviderAPIConfig } from '../types';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
-const WXApiConfig: ProviderAPIConfig = {
-  getBaseURL: () => 'https://us-south.ml.cloud.ibm.com',
+export const WatsonxAPIConfig: ProviderAPIConfig = {
+  getBaseURL: ({ providerOptions }) => providerOptions.customHost || process.env.WATSONX_URL || 'https://us-south.ml.cloud.ibm.com',
   headers: async ({ providerOptions, fn, gatewayRequestBody }) => {
     // IBM Cloud API Key must be exchanged for an access token and then added to each request
     /*
@@ -18,51 +18,47 @@ const WXApiConfig: ProviderAPIConfig = {
     }
     */
 
-    const tokenRsp = await axios.post(
-      'https://iam.cloud.ibm.com/identity/token',
-      {
-        grant_type: 'urn:ibm:params:oauth:grant-type:apikey',
-        apikey: providerOptions.apiKey,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+    try {
+      const tokenRsp = await axios.post(
+        'https://iam.cloud.ibm.com/identity/token',
+        {
+          grant_type: 'urn:ibm:params:oauth:grant-type:apikey',
+          apikey: providerOptions.apiKey,
         },
-      }
-    );
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
 
-    const { access_token } = tokenRsp.data;
+      const { access_token } = tokenRsp.data;
 
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${access_token}`,
-    };
-
-    // Accept anthropic_beta and anthropic_version in body to support enviroments which cannot send it in headers.
-    const betaHeader =
-      providerOptions?.['anthropicBeta'] ??
-      gatewayRequestBody?.['anthropic_beta'] ??
-      'messages-2023-12-15';
-    const version =
-      providerOptions?.['anthropicVersion'] ??
-      gatewayRequestBody?.['anthropic_version'] ??
-      '2023-06-01';
-
-    if (fn === 'chatComplete') {
-      headers['anthropic-beta'] = betaHeader;
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${access_token}`,
+      };
+      
+      return headers;
     }
-    headers['anthropic-version'] = version;
-    return headers;
+    catch (e: any) {
+      console.log(`Error getting access token for watsonx: ${e.data.errorDetails}`)
+    }
   },
-  getEndpoint: ({ fn }) => {
+  getEndpoint: ({ fn, providerOptions }) => {
+    // Accept watsonx_version in header.
+    const version =
+      providerOptions?.['watsonxVersion'] ??
+      '2024-05-31';
+
     switch (fn) {
       case 'complete':
-        return '/complete';
+        return `/ml/v1/text/generation?version=${version}`;
       case 'chatComplete':
-        return '/messages';
+        return `/ml/v1/text/chat?version=${version}`;
+      case 'embed':
+        return `/ml/v1/text/embeddings?version=${version}`
       default:
         return '';
     }
   },
 };
-
-export default WXApiConfig;
